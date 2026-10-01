@@ -36,7 +36,8 @@ After discovery, decide whether you want to create:
 Check [Performance vs. As-is on-premises assessments](target-right-sizing.md) for more details.
 
 > [!NOTE]
-> Azure Migrate doesn’t support file share discovery and TCO assessment on Windows Server 2008 R2. This limitation exists because the operating system lacks the required PowerShell capabilities and system APIs needed to discover file shares and collect assessment data.  
+> - Azure Migrate doesn’t support file share discovery and TCO assessment on Windows Server 2008 R2. This limitation exists because the operating system lacks the required PowerShell capabilities and system APIs needed to discover file shares and collect assessment data.
+> - Hidden file shares are not supported and are excluded from file share discovery.
 
 ## Create an assessment 
 
