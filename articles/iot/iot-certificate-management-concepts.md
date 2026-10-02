@@ -96,7 +96,7 @@ Certificate management uses asymmetric cryptography to establish trusted digital
 
 #### Key size and key curve
 
-The key size or key curve determines the cryptographic strength of a certificate's public/private key pair. Larger key sizes or stronger curves generally provide greater cryptographic strength, but can also affect certificate size, processing requirements, and performance. For example, certificate management in Azure Device Registry issues ECC certificates using the P-256 curve.
+The key size or key curve determines the cryptographic strength of a certificate's public/private key pair. Larger key sizes or stronger curves generally provide greater cryptographic strength, but can also affect certificate size, processing requirements, and performance. For example, certificate management in Azure Device Registry issues ECC certificates using the P-384 curve.
 
 #### Hashing algorithms
 
