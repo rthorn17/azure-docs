@@ -33,9 +33,9 @@ Yes, Windows Server 2025 domain controllers are supported as of September 9, 202
 >
 > Missing or inconsistent PTR records can prevent signed LDAP communication even when the domain controller is reachable and the required Windows updates and AES configuration are present. For more information, see [Troubleshoot volume errors](troubleshoot-volumes.md#errors-for-missing-or-inconsistent-dns-records).
 
-## What happens if LDAP signing is required but LDAP signing isn't enabled for the Azure NetApp Files Active Directory connection?
+## What happens if LDAP signing is required but I don't enable LDAP signing for the Azure NetApp Files Active Directory connection?
 
-If LDAP signing isn't enabled for the Azure NetApp Files Active Directory connection and the initial LDAP connection fails because LDAP signing is required, Azure NetApp Files retries the connection with LDAP signing enabled. For environments that use Windows Server 2025 domain controllers, enabling LDAP signing on the Active Directory connection remains the recommended configuration. Enabling LDAP signing avoids relying on the fallback behavior.
+If you don't enable LDAP signing for the Azure NetApp Files Active Directory connection and the initial LDAP connection fails because LDAP signing is required, Azure NetApp Files retries the connection with LDAP signing enabled. For environments that use Windows Server 2025 domain controllers, enabling LDAP signing on the Active Directory connection remains the recommended configuration. Enabling LDAP signing avoids relying on the fallback behavior.
 
 PTR records are required for the Active Directory domain controllers for the LDAP signing fallback mechanism to function.
 
