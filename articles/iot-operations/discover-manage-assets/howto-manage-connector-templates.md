@@ -131,7 +131,7 @@ az iot ops connector template create \
     --name my-media-template \
     --resource-group $RESOURCE_GROUP \
     --instance $AIO_INSTANCE_NAME \
-    --connector-metadata-ref mcr.microsoft.com/azureiotoperations/akri-connectors/media-metadata:1.3.2 \
+    --connector-metadata-ref mcr.microsoft.com/azureiotoperations/akri-connectors/media-metadata:1.5.0 \
     --storage-volumes claimName=media-pvc mountPath=/data
 ```
 
