@@ -363,7 +363,7 @@ To disable replicating blob index tags for exsiting rules, follow these steps:
 N/A.
 
 #### [Azure CLI](#tab/azure-cli)
-For more information, see [CLI documentation](https://learn.microsoft.com/cli/azure/storage/account/or-policy)
+For more information, see [CLI documentation](/cli/azure/storage/account/or-policy)
 
 Enable tags replication on a new policy
 Add the `--tags-replication true` parameter when you create the policy on the destination account, then copy the policy definition to the source account.
