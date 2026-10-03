@@ -35,7 +35,9 @@ Yes, Windows Server 2025 domain controllers are supported as of September 9, 202
 
 ## What happens if LDAP signing is required but I don't enable LDAP signing for the Azure NetApp Files Active Directory connection?
 
-If you don't enable LDAP signing for the Azure NetApp Files Active Directory connection and the initial LDAP connection fails because LDAP signing is required, Azure NetApp Files retries the connection with LDAP signing enabled. For environments that use Windows Server 2025 domain controllers, enabling LDAP signing on the Active Directory connection remains the recommended configuration. Enabling LDAP signing avoids relying on the fallback behavior.
+If you don't enable LDAP signing for the Azure NetApp Files Active Directory connection and the initial LDAP connection fails because LDAP signing is required, Azure NetApp Files retries the connection with LDAP signing enabled. 
+
+For environments that use Windows Server 2025 domain controllers, enabling LDAP signing on the Active Directory connection remains the recommended configuration. Enabling LDAP signing avoids relying on the fallback behavior.
 
 PTR records are required for the Active Directory domain controllers for the LDAP signing fallback mechanism to function.
 
