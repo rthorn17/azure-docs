@@ -5,9 +5,9 @@ services: healthcare-apis
 ms.service: azure-health-data-services
 ms.subservice: fhir
 ms.topic: tutorial
-ms.author: evach
-author: evachen96
-ms.date: 07/14/2026
+ms.author: kesheth
+author: expekesheth
+ms.date: 10/04/2026
 ---
 
 # FAQ about migration from Azure API for FHIR
@@ -37,9 +37,7 @@ Azure Health Data Service FHIR service offers a rich set of capabilities such as
 
 ## What are the steps to enable SMART on FHIR in Azure Health Data Service FHIR service?
 
-The SMART on FHIR proxy is retiring. Organizations need to transition to the SMART on FHIR, which uses Azure Health Data and AI OSS samples, by **September 21, 2026**. After September 21, 2026, applications relying on SMART on FHIR proxy report errors when accessing the FHIR service.
-
-For information on how to migrate to SMART on FHIR, see [Migrate from SMART on FHIR Proxy to SMART on FHIR](smart-on-fhir.md#migrate-from-smart-on-fhir-proxy-to-smart-on-fhir).
+For information on how to configure identity providers, assign the FHIR SMART user role, and enable SMART on FHIR applications, see [SMART on FHIR](smart-on-fhir.md).
 
 ## What happens after the service is retired on September 30, 2026?
 
