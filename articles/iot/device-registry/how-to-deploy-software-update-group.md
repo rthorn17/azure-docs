@@ -6,36 +6,34 @@ author: dominicbetts
 ms.author: dobett
 ms.service: azure-iot
 ms.topic: how-to
-ms.date: 09/09/2026
+ms.date: 10/05/2026
 ai-usage: ai-assisted
 #Customer intent: As an IoT solution administrator, I want to deploy a software update to a group of IoT Hub-connected devices so that I can update my devices at scale from the Azure portal.
 ---
 
 # Deploy a software update to a group (preview)
 
-Azure Device Registry uses *jobs* to apply *software updates* to *groups* of IoT Hub-connected devices. A software update job targets a group of devices and applies a defined update to the compatible members of that group&mdash;as distinct from an onboarding job, which targets every device in a namespace. Deploying a software update as a job lets you roll out the same update to many devices at once, so you can keep your IoT Hub-connected devices current without updating each device individually.
+Azure Device Registry uses *jobs* to apply *software updates* to *groups* of IoT Hub-connected devices. A software update job targets a group of devices and applies a software update to the compatible members of that group. In contrast, an onboarding update job targets devices that onboard to a namespace. Deploying a software update as a job lets you roll out the same update to many devices at once, so you can keep your IoT Hub-connected devices current without updating each device individually.
 
-This article shows you how to define or validate a target group, use the Azure portal or Bicep to create a standard software update job, run or schedule the job, and monitor the results. Use this article after you prepare the software update that you want to apply. To learn how jobs, groups, and software updates work together, see [Software updates in Azure Device Registry](concept-software-updates.md).
+This article shows you how to define or validate a target group, use the Azure portal or Bicep to create a standard software update job, run or schedule the job, and monitor the results. Use this article after you [import the software update](how-to-import-software-update.md) that you want to apply. To learn how jobs, groups, and software updates work together, see [Software updates in Azure Device Registry](concept-software-updates.md).
 
 > [!IMPORTANT]
-> Azure Device Registry software updates are currently in preview. This preview is provided without a service-level agreement, and the capability and its portal experience might change before it becomes generally available. For more information, see [Supplemental Terms of Use for Microsoft Azure Previews](https://azure.microsoft.com/support/legal/preview-supplemental-terms/).
-
-Only IoT Hub-connected devices are in scope for this preview.
+> Azure Device Registry software updates is currently in preview. The current preview is scoped to IoT Hub-connected devices. This preview is provided without a service-level agreement, and the capability and its portal experience might change before it becomes generally available. For more information, see [Supplemental Terms of Use for Microsoft Azure Previews](https://azure.microsoft.com/support/legal/preview-supplemental-terms/).
 
 > [!NOTE]
-> You can't use Azure Device Registry software updates (preview) on a namespace whose linked IoT Hub has an active Device Update for IoT Hub instance. No migration path exists between the two capabilities during the preview. For more information, see [Software updates in Azure Device Registry](concept-software-updates.md).
+> During the preview, you can use software updates only with IoT hubs that don't have an existing Device Update for IoT Hub instance. To use software updates, link an IoT hub without a Device Update for IoT Hub instance to your namespace, or delete the existing instance before you link the hub. For more information, see [Software updates and Device Update for IoT Hub](concept-software-updates.md#software-updates-and-device-update-for-iot-hub).
 
 ## Prerequisites
 
 - IoT Hub-connected devices whose properties identify the devices that you want to update. Use these properties to define the target group.
-- A prepared software update artifact that you define in the namespace. Use the import workflow in this namespace to import the update package before you create the job. To learn more, see [Import and define a software update](how-to-import-software-update.md).
-- Software updates enabled on the namespace that contains your devices.
+- A software update imported into the namespace. To learn more, see [Import a software update (preview)](how-to-import-software-update.md).
+- Software updates enabled on the namespace that contains your devices. To learn more, see [Get started with Azure Device Registry](get-started-azure-device-registry.md).
 - Azure Resource Manager control-plane permissions, such as the **Contributor** role, to create, read, update, and delete jobs.
-- To run jobs, the Azure Device Registry namespace's managed identity must have the **Device Update Data Contributor** role on the Device Update for IoT Hub instance.
+- To run jobs, the namespace's managed identity must have access to the software updates instance that's linked to the namespace. If you enable software updates in the Azure portal, these role assignments are created for you.
 
 ## Define or validate the target group
 
-A  software update job targets a group instead of every device in the namespace. Create a group with a filter that selects only the IoT Hub-connected devices that should receive the update, or reuse an existing group whose membership matches that scope. For example, use device properties such as manufacturer, model, or software revision to target a specific device cohort. Use the Azure portal or Bicep to create the group.
+A software update job targets a group instead of every device in the namespace. Create a group with a filter that selects only the IoT Hub-connected devices that should receive the update, or reuse an existing group whose membership matches that scope. For example, use device properties such as manufacturer, model, or software revision to target a specific device cohort. Use the Azure portal or Bicep to create the group.
 
 # [Azure portal](#tab/portal)
 
@@ -92,13 +90,13 @@ Group membership is calculated and cached when you create or refresh the group. 
 
 ## Create a software update job
 
-A software update job targets a group of devices and applies a defined software update to the compatible members of that group. Use the Azure portal or Bicep to create the job.
+A software update job targets a group of devices and applies an imported software update to the compatible members of that group. Use the Azure portal or Bicep to create the job.
 
 # [Azure portal](#tab/portal)
 
 1. In the Azure portal, go to your Azure Device Registry and select the namespace that contains the devices you want to update.
 
-1. In the namespace, select **Operations** > **Jobs**. The **Jobs** screen lists the defined jobs with their status, job type, and target group. From this screen, you can also view the groups and software update definitions in the namespace.
+1. In the namespace, select **Operations** > **Jobs**. The **Jobs** screen lists the defined jobs with their status, job type, and target group. From this screen, you can also view the groups and software updates in the namespace.
 
     :::image type="content" source="media/how-to-deploy-software-update-group/jobs-list.png" alt-text="Screenshot of the Jobs page showing defined jobs with their type, status, and target group." lightbox="media/how-to-deploy-software-update-group/jobs-list.png":::
 
@@ -108,7 +106,7 @@ A software update job targets a group of devices and applies a defined software 
 
 1. For the job type, select **Software update**.
 
-    In preview, the available job types are **Software update** and **Onboarding**. A software update job targets a group of devices, and an onboarding job targets all IoT Hub-connected devices in a namespace. This article covers the software update job.
+    In preview, the available job types are **Software update** and **Onboarding update**. A software update job targets a group of devices, and an onboarding update job targets devices that onboard to a namespace. This article covers the software update job.
 
 1. Select the group that you want to target. Use the group picker to search for and select a group. The picker shows the approximate number of devices in each group.
 
@@ -116,7 +114,7 @@ A software update job targets a group of devices and applies a defined software 
 
 1. Save the group selection. The portal shows a sample of the devices in the group and the device count.
 
-1. Define the action to run by selecting one of the defined software updates. Each software update includes a compatibility check that determines whether it applies to a device. The portal runs a compatibility check for the selected group to determine whether the software update is compatible.
+1. Define the action to run by selecting one of the software updates imported into the namespace. Each software update includes a compatibility check that determines whether it applies to a device. The portal runs a compatibility check for the selected group to determine whether the software update is compatible.
 
     :::image type="content" source="media/how-to-deploy-software-update-group/define-action.png" alt-text="Screenshot of the Jobs page showing the action definition for a software update job." lightbox="media/how-to-deploy-software-update-group/define-action.png":::
 
@@ -251,6 +249,6 @@ Each entry in the results identifies the target device and its per-device status
 
 ## Related content
 
-- [Software updates in Azure Device Registry](concept-software-updates.md)
-- [Jobs in Azure Device Registry](concept-jobs.md)
+- [Software updates concepts (preview)](concept-software-updates.md)
+- [Jobs concepts (preview)](concept-jobs.md)
 - [Groups concepts (preview)](concept-groups.md)

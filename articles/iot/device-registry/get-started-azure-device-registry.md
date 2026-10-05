@@ -31,6 +31,9 @@ This article describes how to set up an [Azure Device Registry](overview-device-
 > [!WARNING]
 > Connecting an existing IoT hub or DPS instance to an Azure Device Registry namespace is permanent and can't be reversed. You're asked to acknowledge this effect when you select an existing resource. Azure Device Registry billing begins when you connect the resources.
 
+> [!NOTE]
+> If you plan to enable software updates (preview), use IoT hubs that don't have an existing Device Update for IoT Hub instance. During the preview, software updates works only with these IoT hubs. If your IoT hub already has a Device Update for IoT Hub instance, use a different IoT hub, or delete the existing instance before you connect the hub to the namespace. To learn more, see [Software updates concepts (preview)](concept-software-updates.md#software-updates-and-device-update-for-iot-hub).
+
 ## Ways to get started
 
 You can set up Azure Device Registry in two ways:
