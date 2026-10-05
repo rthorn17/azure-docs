@@ -189,12 +189,12 @@ Once your [regional capacity quota](regional-capacity-quota.md) has increased, y
 
 To create volumes up to 7.2 PiB, you must select **Extra-large volume 7.2 PiB** as the volume type when you create the volume. Cool access must be enabled on the volume. 
 
+> [!NOTE]
+> Submit the applicable request form for each subscription that requires one of the features described in this article. You can't manually register these features. The Azure NetApp Files team reviews submitted requests and completes feature registration after approval. While a request is being reviewed and processed, the feature might appear in a **Pending** or **Registering** state. This status is expected and doesn't require any customer action. After the request is approved and processing is complete, the feature status changes to **Registered**. 
+
 ### Register the feature 
 
 If this is your first time using large volumes, register the feature with the [large volumes sign-up form](https://aka.ms/anflargevolumessignup).
-
- > [!NOTE]
- > Submit the applicable request form for each subscription that requires one of the features described in this article. You can't manually register these features. The Azure NetApp Files team reviews submitted requests and completes feature registration after approval. While a request is being reviewed and processed, the feature might appear in a **Pending** or **Registering** state. This status is expected and doesn't require any customer action. After the request is approved and processing is complete, the feature status changes to **Registered**. 
 
 # [Azure CLI](#tab/azurecli)
 
