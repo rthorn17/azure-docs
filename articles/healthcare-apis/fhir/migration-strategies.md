@@ -5,9 +5,9 @@ services: healthcare-apis
 ms.service: azure-health-data-services
 ms.subservice: fhir
 ms.topic: tutorial
-ms.author: evach
-author: evachen96
-ms.date: 08/17/2026
+ms.author: kesheth
+author: expekesheth
+ms.date: 10/04/2026
 ---
 
 # Migration strategies for moving from Azure API for FHIR
@@ -35,7 +35,7 @@ Compare the differences between Azure API for FHIR and Azure Health Data Service
 
 |Capabilities|Azure API for FHIR|Azure Health Data Services|
 |------------|------------------|--------------------------|
-|**Settings**|Deprecated with the service retirement (9/30/26): <br> • Local RBAC <br> • SMART on FHIR Proxy|Planned deprecation: <br> • SMART on FHIR Proxy (9/21/26)|
+|**Local RBAC**|Deprecated with the service retirement (9/30/26)|Not supported|
 |**Data storage Volume**|More than 4 TB|Current support is 4 TB. Open an [Azure support request](/azure/azure-portal/supportability/how-to-create-azure-support-request) if you need more than 4 TB|
 |**Data ingress**|Tools available in OSS|`$import` operation|
 |**Autoscaling**|Supported on request and incurs charge|Enabled by default at no extra charge|
@@ -52,7 +52,7 @@ Compare the differences between Azure API for FHIR and Azure Health Data Service
 
 - **FHIR Proxy is being deprecated**. If you're using FHIR Proxy for events, refer to the built-in [eventing](../events/events-overview.md) feature. Alternatives can be customized and built using the [Azure Health Data Services toolkit](https://github.com/microsoft/azure-health-data-services-toolkit).
 
-- **SMART on FHIR proxy is being deprecated**. You need to use the new SMART on FHIR capability. More information: [SMART on FHIR](smart-on-fhir.md)
+- **Configure SMART on FHIR applications**. For identity provider integration and access configuration, see [SMART on FHIR](smart-on-fhir.md).
 
 - **Azure Health Data Services FHIR service does not support local RBAC and custom authority**. The token issuer authority needs to be the authentication endpoint for the tenant that the FHIR Service is running in.
 
