@@ -320,6 +320,7 @@ You can update the peer addresses associated with an existing cluster peer by us
 > [!NOTE]
 > * You are required to provide the full set of peer addresses to be used by the cluster peer (not just new ones or ones that have changed).
 > * If you have more than one cache volume using the cluster peer, you only need to execute the modifyClusterPeer call against one of the cache volumes.
+> * The ONTAP system hosting the external origin volume(s) can be connected to multiple cluster peers. In such environments, the modifyClusterPeer operation must be executed on at least one cache volume associated with each cluster peer. To identify the appropriate cache volume(s), use the following ONTAP CLI command: `volume flexcache origin show-caches`
 
 ```
 POST
