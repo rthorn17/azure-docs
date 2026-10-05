@@ -13,7 +13,7 @@ ai-usage: ai-assisted
 
 # Best practices for Azure Device Registry namespaces
 
-[Azure Device Registry](../iot-operations/discover-manage-assets/overview-manage-assets.md) uses *namespaces* to organize devices and assets. Because namespaces act as long-lived organizational boundaries, it's important to plan them before you deploy.
+[Azure Device Registry](../../iot-operations/discover-manage-assets/overview-manage-assets.md) uses [namespaces](concept-namespaces.md) to organize devices and assets. Because namespaces act as long-lived organizational boundaries, it's important to plan them before you deploy.
 
 This article helps you decide:
 
@@ -82,7 +82,7 @@ If your solution approaches these limits, consider whether your namespace design
 
 ## Related content
 
-- [Best practices for Azure Device Registry schema registries](iot-device-registry-schema-registry-guidance.md)
-- [What is asset and device management in Azure IoT Operations?](../iot-operations/discover-manage-assets/overview-manage-assets.md)
-- [What is Azure IoT Hub?](../iot-hub/iot-concepts-and-iot-hub.md)
-- [What is Azure IoT Operations?](../iot-operations/overview-iot-operations.md)
+- [Best practices for Azure Device Registry schema registries](best-practices-schema-registries.md)
+- [What is asset and device management in Azure IoT Operations?](../../iot-operations/discover-manage-assets/overview-manage-assets.md)
+- [What is Azure IoT Hub?](../../iot-hub/iot-concepts-and-iot-hub.md)
+- [What is Azure IoT Operations?](../../iot-operations/overview-iot-operations.md)

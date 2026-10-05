@@ -13,7 +13,7 @@ ai-usage: ai-assisted
 
 # Best practices for Azure Device Registry schema registries
 
-The [schema registry](../iot-operations/connect-to-cloud/concept-schema-registry.md), a feature of [Azure Device Registry](../iot-operations/discover-manage-assets/overview-manage-assets.md), is a synchronized repository that's accessible both in the cloud and at the edge. It stores definitions of messages coming from edge assets and exposes an API to access those schemas from either location.
+The [schema registry](../../iot-operations/connect-to-cloud/concept-schema-registry.md), a feature of [Azure Device Registry](../../iot-operations/discover-manage-assets/overview-manage-assets.md), is a synchronized repository that's accessible both in the cloud and at the edge. It stores definitions of messages coming from edge assets and exposes an API to access those schemas from either location.
 
 This article helps you decide:
 
@@ -28,7 +28,7 @@ Schema registries are currently used only in Azure IoT Operations scenarios, whe
 |---|---|---|
 | Schema registries | GA | Not applicable |
 
-For more information about schema registries, see [Understand message schemas](../iot-operations/connect-to-cloud/concept-schema-registry.md).
+For more information about schema registries, see [Understand message schemas](../../iot-operations/connect-to-cloud/concept-schema-registry.md).
 
 ## Cardinality rules
 
@@ -69,7 +69,8 @@ The following limit affects schema registry design. For the full list, see [Azur
 
 ## Related content
 
-- [Best practices for Azure Device Registry namespaces](iot-device-registry-namespace-guidance.md)
-- [Understand message schemas](../iot-operations/connect-to-cloud/concept-schema-registry.md)
-- [What is asset and device management in Azure IoT Operations?](../iot-operations/discover-manage-assets/overview-manage-assets.md)
-- [What is Azure IoT Operations?](../iot-operations/overview-iot-operations.md)
+- [What is an Azure Device Registry namespace?](concept-namespaces.md)
+- [Best practices for Azure Device Registry namespaces](best-practices-namespaces.md)
+- [Understand message schemas](../../iot-operations/connect-to-cloud/concept-schema-registry.md)
+- [What is asset and device management in Azure IoT Operations?](../../iot-operations/discover-manage-assets/overview-manage-assets.md)
+- [What is Azure IoT Operations?](../../iot-operations/overview-iot-operations.md)
