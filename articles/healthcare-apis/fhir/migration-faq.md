@@ -12,17 +12,15 @@ ms.date: 10/04/2026
 
 # FAQ about migration from Azure API for FHIR
 
-## When will Azure API for FHIR retire?
+<a id="when-will-azure-api-for-fhir-retire"></a>
 
-Azure API for FHIR&reg; retires on September 30, 2026.
+## When was Azure API for FHIR deprecated?
+
+Microsoft deprecated Azure API for FHIR on **September 30, 2026**. For questions or assistance, create an Azure support request by using **Azure API for FHIR Extension Request**.
 
 ## Are new deployments of Azure API for FHIR allowed?
 
 After April 1, 2025, you can't create new deployments of Azure API for FHIR. Before April 1, 2025, you can create new deployments.
-
-## Why is Microsoft retiring Azure API for FHIR?
-
-Azure API for FHIR is a service that's purpose built for protected health information (PHI), meeting regional compliance requirements. In March 2022, Microsoft announced the general availability of Azure Health Data Services, which enables quick deployment of managed, enterprise-grade FHIR and DICOM services for diverse health data integration. With this new experience, Microsoft is retiring Azure API for FHIR.
 
 ## What are the benefits of migrating to Azure Health Data Services FHIR service?
 
@@ -39,15 +37,6 @@ Azure Health Data Service FHIR service offers a rich set of capabilities such as
 
 For information on how to configure identity providers, assign the FHIR SMART user role, and enable SMART on FHIR applications, see [SMART on FHIR](smart-on-fhir.md).
 
-## What happens after the service is retired on September 30, 2026?
-
-After September 30, 2026, customers can't:
-
-- Create or manage Azure API for FHIR accounts.
-- Access the data through the Azure portal or APIs/SDKs/client tools.
-- Receive service updates to Azure API for FHIR or APIs/SDKs/client tools.
-- Access customer support (phone, email, web).
-
 ## Where can customers go to learn more about migrating to Azure Health Data Services FHIR service?
 
 Start with [migration strategies](migration-strategies.md) to learn more about Azure API for FHIR to Azure Health Data Services FHIR service migration. The migration from Azure API for FHIR to Azure Health Data Services FHIR service involves data migration and updating the applications to use Azure Health Data Services FHIR service. Find more documentation on the step-by-step approach to migrating your data and applications in the [migration tool](https://github.com/Azure/apiforfhir-migration-tool/tree/main).
@@ -57,7 +46,7 @@ Start with [migration strategies](migration-strategies.md) to learn more about A
 Check out these resources if you need further assistance:
 
 - Get answers from community experts in [Microsoft Q&A](/answers/questions/1377356/retirement-announcement-azure-api-for-fhir).
-- If you have a support plan and require technical support, [contact us](https://ms.portal.azure.com/#view/Microsoft_Azure_Support/HelpAndSupportBlade/~/overview).
+- For questions or assistance, create an [Azure support request](https://ms.portal.azure.com/#view/Microsoft_Azure_Support/HelpAndSupportBlade/~/overview) by using **Azure API for FHIR Extension Request**.
 
 
 [!INCLUDE [FHIR trademark statement](../includes/healthcare-apis-fhir-trademark.md)]

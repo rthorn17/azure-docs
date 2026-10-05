@@ -8140,7 +8140,7 @@
     },
     {
       "source_path": "articles/iot-hub/how-to-revoke-certificate-delete-policy.md",
-      "redirect_url": "../iot/how-to-revoke-certificate-delete-policy",
+      "redirect_url": "../iot/concepts-certificate-policy-management",
       "redirect_document_id": false
     },
     {
