@@ -62,7 +62,7 @@ Azure Device Registry provides groups, jobs, and software updates so that you ca
 
 - **Groups** organize IoT Hub-connected devices into query-defined sets that you target with fleet-scale operations. For more information, see [Groups concepts (preview)](concept-groups.md).
 - **Jobs** run namespace-wide operations, such as software updates, against a group of devices that can span multiple Azure IoT Hub instances. For more information, see [Jobs concepts (preview)](concept-jobs.md).
-- **Software updates** prepare update artifacts and deploy standard or onboarding updates to devices through groups and jobs. For more information, see [Software updates concepts (preview)](concept-software-updates.md).
+- **Software updates** let you import updates and deploy them over the air to devices by using software update jobs and onboarding update jobs. For more information, see [Software updates concepts (preview)](concept-software-updates.md).
 
 For production software update workloads, use [Device Update for IoT Hub](../../iot-hub-device-update/understand-device-update.md), which is generally available.
 
@@ -120,7 +120,7 @@ In Azure IoT Operations, Azure Device Registry is generally available and manage
 
 In Azure IoT Hub, Azure Device Registry integration is in preview. Azure Device Registry represents each Azure IoT Hub device as an Azure Resource Manager resource, which enables management across multiple Azure IoT Hub instances through shared namespaces. Azure Device Registry provides certificate management for IoT Hub-connected devices, enabling you to issue, renew, and revoke X.509 device certificates from the Azure control plane. For more information, see [Integration with Azure Device Registry (preview)](../../iot-hub/iot-hub-device-registry-overview.md) and [What is certificate management in Azure Device Registry?](../iot-certificate-management-overview.md).
 
-In Azure IoT Hub, Azure Device Registry uses groups and jobs to enable bulk software updates for IoT Hub-connected devices, letting you deploy and manage updates across many devices efficiently. These capabilities are currently in preview.
+For IoT Hub-connected devices, Azure Device Registry software updates uses groups and jobs to deploy updates over the air to many devices at once, across all the IoT hubs linked to a namespace. These capabilities are currently in preview. For more information, see [Software updates concepts (preview)](concept-software-updates.md).
 
 ## Related content
 

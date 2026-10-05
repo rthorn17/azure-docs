@@ -25,11 +25,11 @@ A cloud PKI provides the same certificate authority capabilities as traditional 
 
 ## Microsoft cloud PKI vs. third-party PKI
 
-While IoT Hub supports two types of PKI providers for X.509 certificate authentication, certificate management in Azure Device Registry currently only supports Microsoft cloud PKI. For information about using third-party PKI providers, see [Authenticate devices with X.509 CA certificates](../iot-hub/authenticate-authorize-x509.md).
+While IoT Hub supports two types of PKI providers for X.509 certificate authentication, certificate management in Azure Device Registry currently only supports Microsoft cloud PKI and bring your own CA. For information about using third-party PKI providers, see [Authenticate devices with X.509 CA certificates](../iot-hub/authenticate-authorize-x509.md).
 
 | PKI provider | Integration required | Azure Device Registry required | Device Provisioning Service required |
 |--------------|----------------------|-------------------| --------------|
-| Microsoft-managed PKI | No. Configure certificate authorities directly in Azure Device Registry.| Yes | Yes |
+| Microsoft cloud PKI | Configure certificate authorities directly in Azure Device Registry or bring your own CA.| Yes | Yes |
 | Third-party PKI (DigiCert, GlobalSign, etc.) | Yes. Manual integration required.  | No | No |
 
 Each namespace receives its own logically isolated cloud PKI environment, ensuring certificate operations are restricted to resources within that namespace.  Customers don't manage the cloud PKI as a separate Azure resource. Instead, the cloud PKI is automatically provisioned, scoped, and managed as part of an Azure Device Registry namespace.
@@ -96,7 +96,7 @@ Certificate management uses asymmetric cryptography to establish trusted digital
 
 #### Key size and key curve
 
-The key size or key curve determines the cryptographic strength of a certificate's public/private key pair. Larger key sizes or stronger curves generally provide greater cryptographic strength, but can also affect certificate size, processing requirements, and performance. For example, certificate management in Azure Device Registry issues ECC certificates using the P-256 curve.
+The key size or key curve determines the cryptographic strength of a certificate's public/private key pair. Larger key sizes or stronger curves generally provide greater cryptographic strength, but can also affect certificate size, processing requirements, and performance. For example, certificate management in Azure Device Registry issues ECC certificates using the P-384 curve.
 
 #### Hashing algorithms
 

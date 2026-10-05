@@ -1,42 +1,43 @@
 ---
-title: Import and Define a Software Update
+title: Import a Software Update
 titleSuffix: Azure Device Registry
-description: Learn how to import a software update package into Azure Device Registry and define its update manifest so it's ready to deploy to a group.
+description: Learn how to import a software update and its import manifest into an Azure Device Registry namespace so you can deploy it to your devices.
 author: dominicbetts
 ms.author: dobett
 ms.service: azure-iot
 ms.topic: how-to
-ms.date: 08/28/2026
-#Customer intent: As an IoT solution operator, I want to import a software update package and define its manifest so that I can deploy it to devices through Azure Device Registry.
+ms.date: 10/05/2026
+#Customer intent: As an IoT solution operator, I want to import a software update into my Azure Device Registry namespace so that I can deploy it to my devices.
 ---
 
-# Import and define a software update
+# Import a software update (preview)
 
-Before you can deploy a software update to a group of devices or a namespace, you need to import the update package into Azure Device Registry and ensure it has a valid update manifest. The update manifest describes the update's identity, compatibility, and installation steps so Azure Device Registry knows which devices the update applies to and how to install it.
+Before you can deploy a software update to a group of devices or to devices that onboard to a namespace, you need to import the update into your Azure Device Registry namespace. Each software update consists of one or more update files and an import manifest. The import manifest describes the update's identity, the devices it's compatible with, and how to install it, so Azure Device Registry knows which devices the update applies to.
 
-This preview is currently scoped to IoT Hub-connected devices in an Azure Device Registry namespace.
-
-This article shows you how to import an update package from an Azure Storage container into the software updates library for a namespace, and how to define a manifest for an update if one isn't already provided.
+This article shows you how to import a software update from an Azure Storage container into a namespace, and how to delete an imported update that you no longer need.
 
 > [!IMPORTANT]
-> Azure Device Registry software updates are currently in preview. This preview is provided without a service-level agreement, and the capability and its portal experience might change before it becomes generally available. For more information, see [Supplemental Terms of Use for Microsoft Azure Previews](https://azure.microsoft.com/support/legal/preview-supplemental-terms/).
+> Azure Device Registry software updates is currently in preview. The current preview is scoped to IoT Hub-connected devices. This preview is provided without a service-level agreement, and the capability and its portal experience might change before it becomes generally available. For more information, see [Supplemental Terms of Use for Microsoft Azure Previews](https://azure.microsoft.com/support/legal/preview-supplemental-terms/).
 
 ## Prerequisites
 
 - An active Azure subscription. If you don't have one, create a [free account](https://azure.microsoft.com/pricing/purchase-options/azure-account?cid=msft_learn).
-- An existing Azure Device Registry namespace. For setup steps, see [Deploy Azure IoT Hub with ADR integration](../../iot-hub/iot-hub-device-registry-setup.md).
-- Permissions to manage software updates in the Azure Device Registry namespace, such as the [Azure Device Registry Credentials Contributor](../../role-based-access-control/built-in-roles/internet-of-things.md#azure-device-registry-credentials-contributor) role.
-- An Azure Storage account and container that contains your update files. Supported file types include update payloads (for example, `.swu`, `.sh`). Every software update needs an import manifest file with the `.importmanifest.json` extension.
+- An Azure Device Registry namespace with software updates enabled. To create a namespace and enable software updates, see [Get started with Azure Device Registry](get-started-azure-device-registry.md).
+- Permissions to read the update files in your storage account, such as the [Storage Blob Data Contributor](../../role-based-access-control/built-in-roles/storage.md#storage-blob-data-contributor) role.
+- Permissions to import software updates to the namespace, such as the [Device Update Content Administrator](../../role-based-access-control/built-in-roles/internet-of-things.md#device-update-content-administrator) role on the software updates instance that's linked to your namespace.
+- An Azure Storage account with a container that holds your update files and an import manifest:
+  - **Update files**: The files that your device installs, such as an image, a package, or a script (for example, `.swu` or `.sh`).
+  - **Import manifest**: A JSON file with the `.importmanifest.json` extension that describes the update. Every software update requires an import manifest. To learn how to create one, see [Prepare an update to import](../../iot-hub-device-update/create-update.md) and the [import manifest schema](../../iot-hub-device-update/import-schema.md).
 
-## Go to the software updates library
+## Go to software updates in your namespace
 
 1. In the [Azure portal](https://portal.azure.com), go to your Azure Device Registry namespace.
 1. In the resource menu, under **Operations**, select **Software updates (preview)**.
-1. On the **Software updates (preview)** page, select the **Imports** tab to view the update packages that are already imported for this namespace.
+1. On the **Software updates (preview)** page, select the **Imports** tab to view the software updates that are already imported to the namespace.
 
-If you didn't import any updates yet, the page shows **No updates to display**. Select **Import update** to start the import process.
+If you haven't imported any updates yet, the page shows **No updates to display**.
 
-## Import an update package
+## Import a software update
 
 1. On **Software updates (preview)**, select **+ Import**.
 1. On **Import software updates**, under **File selection**, select **+ Add files**.
@@ -44,45 +45,52 @@ If you didn't import any updates yet, the page shows **No updates to display**. 
    :::image type="content" source="media/how-to-import-software-update/import-form.png" alt-text="Screenshot of the Import software updates page with the Add files command." lightbox="media/how-to-import-software-update/import-form.png":::
 
 1. Select the storage account that contains your update files, and then select **Next**.
-
 1. Select the container that contains your update files, and then select **Next**.
-1. On **Select files**, select the update payload files you want to import. If your container also has an import manifest file (with the `.importmanifest.json` extension), select it too.
+1. On **Select files**, select the update files and the import manifest file (with the `.importmanifest.json` extension) that you want to import.
 
-   :::image type="content" source="media/how-to-import-software-update/select-update-files.png" alt-text="Screenshot of update payload and import manifest files selected in a storage container." lightbox="media/how-to-import-software-update/select-update-files.png":::
+   :::image type="content" source="media/how-to-import-software-update/select-update-files.png" alt-text="Screenshot of update files and an import manifest file selected in a storage container." lightbox="media/how-to-import-software-update/select-update-files.png":::
 
-1. Select the files, and then close the file picker to return to **Import software updates**.
-1. In the **Description** box, enter an optional description for the update.
-1. Under **Malware scan**, select **Scan update files for malware** if you want Azure Device Registry to check the update files for known malware threats before importing. Scanning is available in select regions.
-
+1. Close the file picker to return to **Import software updates**.
+1. In the **Description** box, optionally enter a description for the update.
+1. Under **Malware scan**, select **Scan update files for malware** if you want the update files checked for known malware before they're imported. Malware scanning is available in select regions.
 1. Select **Import**.
 
-If the import succeeds, the update appears in the **Imports** list with its name, provider, version, and description.
+When the import succeeds, the update appears in the **Imports** list with its name, provider, version, and description. You can now deploy it by using a software update job or an onboarding update job.
 
-### Bundle updates with a parent and child manifest
+### Fix a missing import manifest
 
-Some updates are made up of multiple related update packages, such as a parent update that references one or more child updates. When you import files that include a parent/child manifest relationship, Azure Device Registry shows the parent update along with its associated child updates after a successful import. Use this structure when you need to describe a bundle of updates that must be installed together or in a specific order.
+If you select **Update files** without an import manifest, the import fails with the message **No import manifest was found**.
 
-   :::image type="content" source="media/how-to-import-software-update/nested-import.png" alt-text="Screenshot of nested import showing parent and child updates." lightbox="media/how-to-import-software-update/nested-import.png":::
+1. Review the error banner on the **Import software updates** page. It reminds you that import manifest files use the `.importmanifest.json` extension.
+1. Add an import manifest that describes the update to your storage container.
+1. Select **Replace files**, and then select your update files and the import manifest.
+1. Select **Import** again.
 
-## Define a manifest for an update
+> [!NOTE]
+> In this preview, you can't create or edit an import manifest in the Azure portal. Create the import manifest before you import the update.
 
-An import manifest describes the update's identity, compatibility requirements, and installation steps. If you select update payload files without an accompanying `.importmanifest.json` file, Azure Device Registry can't determine this information automatically, and the import fails with an error.
+### Import parent and child updates
 
-1. If your import fails with the message **No import manifest was found**, review the error banner on the **Import software updates** page. The banner reminds you that the file extension for import manifests is `.importmanifest.json`.
-1. Select **Replace files**, go back to your storage container, add an `.importmanifest.json` file that describes the update, and reselect your files.
-1. After you provide the required manifest information, select **Import** again to complete the import with the newly defined manifest.
+An import manifest can reference other updates. For example, a parent update can reference one or more child updates that must be installed together or in a specific order. When you import a parent update together with its child updates, the **Imports** list shows the parent update with its associated child updates.
 
-## Delete an update
+:::image type="content" source="media/how-to-import-software-update/nested-import.png" alt-text="Screenshot of an imported parent update with its child updates." lightbox="media/how-to-import-software-update/nested-import.png":::
 
-If you no longer need an imported update, you can remove it from the software updates library.
+> [!NOTE]
+> In this preview, the software updates client in the unified Azure IoT SDKs doesn't install updates that reference other updates. To deploy to devices that use the software updates client, import updates whose import manifests don't reference child updates. For more information, see [Preview limitations](concept-software-updates.md#preview-limitations).
+
+## Delete a software update
+
+If you no longer need an imported update, you can delete it from the namespace.
 
 1. On the **Software updates (preview)** page, select the **Imports** tab.
-1. Select the checkbox next to the update you want to remove.
+1. Select the checkbox next to the update that you want to delete.
 1. Select **Delete**.
-1. When prompted **Are you sure you want to delete this software update?**, select **Delete** to confirm.
+1. When prompted, select **Delete** to confirm.
 
-Deleting an update removes it from the software updates library. Devices that already received the update aren't affected, but you can no longer target this update in a new job.
+Deleting a software update doesn't affect devices that already installed it. However, you can no longer use the update in a new job.
 
-## Next steps
+## Related content
 
-[Deploy a software update to a group](how-to-deploy-software-update-group.md)
+- [Software updates concepts (preview)](concept-software-updates.md)
+- [Deploy a software update to a group (preview)](how-to-deploy-software-update-group.md)
+- [Deploy an onboarding update to a namespace (preview)](how-to-deploy-onboarding-update-namespace.md)

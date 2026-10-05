@@ -14,72 +14,86 @@ ai-usage: ai-assisted
 # Unified Azure IoT SDKs (preview) for IoT Hub and Azure Device Registry
 
 > [!IMPORTANT]
-> The unified Azure IoT SDKs are currently in public preview. Preview functionality is provided without a service-level agreement.
+> The unified Azure IoT SDKs and the capabilities described in this article are currently in public preview. Preview functionality is provided without a service-level agreement and isn't recommended for production workloads.
 > See the [Supplemental Terms of Use for Microsoft Azure Previews](https://azure.microsoft.com/support/legal/preview-supplemental-terms/) for legal terms that apply to Azure features that are in beta, preview, or otherwise not yet released into general availability.
 
-The unified Azure IoT SDKs (preview) are a set of libraries that give you a single, lifecycle-aware way to build device applications that provision, connect, secure, and update devices across Azure IoT services. Instead of stitching together separate service-specific libraries for the Device Provisioning Service, Azure IoT Hub, Azure Device Registry, certificate management, and Device Update for IoT Hub, you work with one coherent SDK that models the whole device lifecycle.
+The unified Azure IoT SDKs (preview) provide a lifecycle-aware programming model for building device applications that work with Azure IoT services. The SDKs bring device provisioning, connectivity, credential management, and device operations into a more consistent development model.
 
-The unified SDKs exist because a production device rarely uses one Azure IoT service in isolation. Over its lifetime, a device is provisioned, connects and exchanges data, is represented and governed as a resource, and keeps its credentials current. The unified SDKs bring those stages together so that you write less integration code and follow a supported path from the first provisioning call to ongoing operation.
+Rather than requiring your application to independently coordinate service-specific device libraries and lifecycle state, the unified SDKs introduce a shared connection model and capability-focused clients. This approach is intended to simplify the application logic required to manage the device lifecycle.
 
-This article helps you understand the unified SDK strategy and how the SDKs model the end-to-end device lifecycle, so you can choose and adopt the right SDK for your language. It's for developers building an end-to-end Azure IoT solution.
+The unified SDKs are new SDKs and are currently available for evaluation in preview. Existing Azure IoT Hub and Device Provisioning Service SDKs remain available for existing production scenarios.
+
+This article describes the unified SDK strategy and its device lifecycle model so that you can evaluate the preview SDK that's appropriate for your device application.
 
 ## The unified SDK strategy
 
-The unified SDKs (preview) center on one shared *connection client* and a set of capability-focused *feature clients*. The connection client owns the responsibilities that every device shares: provisioning through the Device Provisioning Service, selecting the endpoint returned by provisioning, setting up the protocol, handling certificates, reconnecting after transient failures, and reprovisioning when required. The feature clients build on that shared connection to expose specific capabilities, such as sending telemetry, working with device twins, handling direct methods, managing certificates, and applying device updates.
+The unified SDKs (preview) use one shared *connection client* and a set of capability-focused *feature clients*. 
+The connection client handles common device lifecycle tasks such as provisioning through the Device Provisioning Service, setting up connectivity with the assigned IoT Hub endpoint, managing connection state, and supporting recovery when connectivity changes.
 
-This design puts the strategy before the packages. Rather than asking you to choose and coordinate a provisioning library, a messaging library, and a certificate library, the unified SDKs present the device lifecycle as one model. The shared connection client coordinates the services, and the feature clients give you the capabilities you need without duplicating connection or credential logic.
+Feature clients use the shared connection and provide device capabilities such as telemetry, device twins, direct methods, and other capabilities available in the corresponding preview SDK.
 
-A key part of the strategy is that the SDK, not your application, owns protocol selection. Your device application uses the endpoint returned by the Device Provisioning Service and doesn't explicitly choose between MQTT 3.1.1 and MQTT 5 implementations. The SDK uses:
+This architecture provides a consistent application model across the device lifecycle. Instead of independently coordinating provisioning, connectivity, credentials, and individual device capabilities, your application works with a common SDK lifecycle and adds the feature clients it needs.
 
-- MQTT 3.1.1 for endpoints of IoT Hub without Azure Device Registry integration.
-- MQTT 5 for endpoints of IoT Hub with Azure Device Registry integration.
+The SDK manages service and protocol-specific behavior associated with the connection lifecycle so that device applications don't need to implement those details independently.
 
 > [!NOTE]
-> You can use DPS to configure what type of IoT Hub your device connects to.
+> Capability availability can vary by SDK, language, configuration, and preview version. Review the documentation and samples for the specific SDK version you're evaluating.
 
-The unified Azure IoT SDKs are brand-new SDKs, not revisions of the existing Azure IoT Hub and Device Provisioning Service SDKs. The existing SDKs continue to work with existing Azure IoT hubs and Azure Device Registry-enabled IoT hubs. Devices that use the existing SDKs can be projected into Azure Device Registry without device-side code changes. To use new device-side capabilities such as certificate management and device updates, adopt the unified SDK.
+The unified Azure IoT SDKs are new SDKs rather than revisions of the existing Azure IoT Hub and Device Provisioning Service SDKs.
 
-In an Azure Device Registry-enabled architecture, the Device Provisioning Service is the only onboarding path for devices. The unified SDK incorporates recommended provisioning, connectivity, reconnection, and reprovisioning patterns. For the underlying guidance, see [Device Provisioning Service deployment-at-scale best practices](../../iot-dps/concepts-deploy-at-scale.md).
+Existing Azure IoT SDKs continue to be the supported choice for existing production scenarios. Evaluate the unified SDKs when you want to explore the new lifecycle model and preview capabilities.
+
+For Device Provisioning Service architecture and deployment guidance, see [Device Provisioning Service deployment-at-scale best practices](../../iot-dps/concepts-deploy-at-scale.md).
 
 ## The end-to-end Azure IoT device lifecycle
 
 The unified SDKs model the device lifecycle as a continuous journey rather than a series of disconnected service calls. A typical device moves through the following stages:
 
-- **Start with an onboarding credential.** The device begins with an initial credential that establishes its identity for provisioning.
-- **Provision through the Device Provisioning Service.** The connection client provisions the device and receives the assigned Azure IoT Hub endpoint. Your application uses that endpoint rather than hard-coding a hub.
-- **Connect and operate.** The device connects to the assigned Azure IoT Hub endpoint and exchanges telemetry and commands through the feature clients.
-- **Manage certificates.** The device can request an operational X.509 certificate during provisioning and renew it while connected. Your application decides when to renew the certificate and reconnects the device to apply the renewed identity.
-- **Apply updates.** The Software Update client verifies update manifests, downloads and installs updates, and reports update status.
-- **Reconnect or reprovision.** After a transient connection failure, the SDK reconnects to the assigned Azure IoT Hub endpoint. The SDK provisions again through the Device Provisioning Service if Azure IoT Hub rejects the device identity or if repeated connection failures indicate that the cached assignment might be stale.
+- **Establish an initial device identity.** The device starts with the credentials required for its configured provisioning or connection scenario.
+- **Provision the device.** The connection client can use the Device Provisioning Service to register the device and obtain its assigned IoT Hub endpoint.
+- **Connect and operate.** After a connection is established, the application can use the feature clients available in the selected SDK to interact with IoT Hub.
+- **Manage device credentials.** Preview certificate-management capabilities can support scenarios such as certificate enrollment and renewal where they're available and configured.
+- **Use additional device capabilities.** Depending on the SDK and preview version, additional feature clients can expose device-management or lifecycle capabilities.
+- **Recover connectivity.** The connection client provides lifecycle behavior for reconnecting or reprovisioning when required by the supported SDK scenario.
 
 Because the connection client coordinates these stages, your application follows one consistent flow. The SDK handles transient connection recovery, but a retry can repeat an operation, so your application remains responsible for making non-idempotent operations safe to retry or for detecting duplicates.
 
+Applications remain responsible for their own business logic and for handling application operations safely when an operation can be retried or repeated.
+
 ## Map Azure IoT capabilities to SDK clients
 
-Each stage of the lifecycle maps to a capability, and a device client exposes each capability.
+The unified SDK architecture separates common connection lifecycle behavior from capability-specific device operations.
 
-| Lifecycle stage | Capability | Client type |
+| Lifecycle area | Azure capability | SDK role |
 |---|---|---|
-| Provision | Device Provisioning Service | Device client |
-| Connect, telemetry, commands | Azure IoT Hub | Device client |
-| Represent and manage devices | Azure Device Registry | Service and management-plane client |
-| Certificate management | Certificate enrollment and renewal | Device and service clients |
-| Device updates | Device Update for IoT Hub | Device client |
+| Provisioning | Device Provisioning Service | Connection client |
+| Connectivity and device messaging | Azure IoT Hub | Connection client and feature clients |
+| Device representation and management | Azure Device Registry | Service and management-plane APIs |
+| Certificate lifecycle | Certificate enrollment and renewal | Device and service capabilities where available in preview |
+| Device lifecycle capabilities | Additional Azure IoT capabilities | Feature-specific clients where available in preview |
 
-Device clients handle provisioning, connection, telemetry, and commands from the device itself. 
+Device-side clients handle the supported provisioning, connectivity, and device operations available in each preview SDK.
+
+Because the unified SDKs are evolving during preview, the exact capability set differs by language and SDK version. Use the documentation for the specific SDK you're evaluating to determine which capabilities are currently available.
 
 ## Choose the unified Azure IoT SDK for your language
 
-Microsoft provides unified Azure IoT SDKs for .NET and C. Both language options are currently in  preview. Choose the SDK that matches your device application language, and then follow the linked documentation for package details and samples.
+Unified Azure IoT SDKs are currently available in preview for .NET and C.
 
-The unified SDK provides a single C client suite that covers the full range of C-based devices, from constrained embedded targets such as bare-metal and FreeRTOS devices to higher-end Linux devices. You use the same C SDK regardless of your device class.
+Choose the SDK that matches your device application language, and then review its version-specific documentation, samples, supported capabilities, and known limitations before adopting it.
 
-| Language | Package | Version | Documentation | Availability |
+The C SDK is designed for native C device applications and supports a range of device environments. Review the C SDK documentation for its platform requirements, build configuration, and currently supported capabilities.
+
+| Language | Package or source | Version | Documentation | Availability |
 |---|---|---|---|---|
 | .NET | `Microsoft.Azure.Iot.Device` | `1.0.0` | [.NET SDK documentation](/dotnet/api/overview/azure/iot) | Preview |
 | .NET | `Microsoft.Azure.Iot.Device` | `2.0.0-preview` | [.NET SDK documentation](/dotnet/api/overview/azure/iot) | Preview |
-| C | GitHub source | See documentation | [Unified C SDK documentation](https://github.com/Azure/azure-iot-sdk/blob/releases/public-preview/c/README.md) | Preview |
+| C | GitHub source | See C SDK documentation | [Unified C SDK documentation](https://github.com/Azure/azure-iot-sdk/blob/releases/public-preview/c/README.md) | Preview |
 
-Use version `1.0.0` of the .NET SDK for production scenarios that use IoT Hub with Azure Device Registry integration for GA capabilities.
 
-Use version `2.0.0-preview` of the .NET SDK for non-production scenarios that rely on preview capabilities of IoT Hub with Azure Device Registry integration for testing features in the preview release.
+> [!IMPORTANT]
+> The versions and SDKs listed here are preview offerings. Don't interpret a package version without a `-preview` suffix as indicating that all unified Azure IoT SDK capabilities or related Azure IoT integrations are generally available.
+>
+> Review the documentation for the specific SDK version you're evaluating to understand its supported scenarios and current preview limitations.
+
+For production applications that depend on capabilities provided by the existing Azure IoT Hub or Device Provisioning Service SDKs, continue to use the applicable in-market SDK unless the documentation for the unified SDK explicitly identifies your scenario as supported for production use.
