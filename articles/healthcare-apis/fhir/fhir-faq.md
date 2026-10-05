@@ -6,7 +6,7 @@ author: expekesheth
 ms.service: azure-health-data-services
 ms.subservice: fhir
 ms.topic: faq
-ms.date: 02/23/2026
+ms.date: 10/04/2026
 ms.author: kesheth
 ms.custom: references_regions
 ---
@@ -47,7 +47,7 @@ For more information, see [Supported FHIR features](fhir-features-supported.md).
 
 ### What is the difference between Azure API for FHIR and the FHIR service in the Azure Health Data Services?
 
-Azure API for FHIR was our initial generally available product and is being retired as of September 30, 2026. The following table describes differences between Azure API for FHIR and Azure Health Data Services, FHIR service.
+Microsoft deprecated Azure API for FHIR on **September 30, 2026**. For questions or assistance, create an Azure support request by using **Azure API for FHIR Extension Request**. The following table compares Azure API for FHIR with the FHIR service in Azure Health Data Services.
 
 |Capabilities|Azure API for FHIR|Azure Health Data Services|
 |------------|------------------|--------------------------|
@@ -174,4 +174,3 @@ In this article, you learned the answers to frequently asked questions about FHI
 >[FAQs about Azure API for FHIR](../azure-api-for-fhir/fhir-faq.yml)
 
 [!INCLUDE [FHIR trademark statement](../includes/healthcare-apis-fhir-trademark.md)]
-
