@@ -82,7 +82,7 @@ items:
     href: status-code.md
   - name: Collect a support bundle
     href: troubleshooting.md
-  - name: Monitor copy and job run logs
+  - name: Monitor copy, job run, and audit logs
     href: log-monitoring.md
   - name: Release notes
     href: release-notes.md
