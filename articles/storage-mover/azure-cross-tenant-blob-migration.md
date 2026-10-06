@@ -44,7 +44,7 @@ The Azure Blob container-to-container cross-tenant transfer feature has the foll
 - Storage Mover doesn't automatically rehydrate archived blobs. Restore data in the Archive tier and wait for rehydration to complete before starting a migration job.
 - The source and target must refer to different Blob containers.
 - Blobs are copied, not removed from the source. The source container and its data remain after migration completes.
-- Source and target Storage Mover resources must be in the same Azure region. This limit doesn't apply to the storage accounts, which can be in different regions.
+- Source and target Storage Mover resources must be in the same Azure region. This limit doesn't apply to the storage accounts, which can be in different Azure regions.
 
 For cross-tenant migration, both endpoints must explicitly enable cross-tenant transfer and allow the partner storage account. You create the project, job definition, and job run in the source Storage Mover resource. Don't create a second job in the target tenant.
 
@@ -54,7 +54,7 @@ This section illustrates the relationships between the Azure resources used in a
 
 ### Azure resources and their relationships
 
-Each tenant contains a Storage Mover resource, an endpoint with its own managed identity, and a storage account with a Blob container. The source Storage Mover also contains the project, job definition, and job run. The following visual shows resource ownership, access, and the logical transfer direction.
+Each tenant contains a Storage Mover resource, an endpoint with its own managed identity, and a storage account with a Blob container. The source Storage Mover resource also contains the project, job definition, and job run. The following visual shows resource ownership, access, and the logical transfer direction. Both Storage Mover resources contain their respective Storage Mover endpoints. These endpoints are granted required RBAC permissions on to the Storage Account that these endpoints point to. The RBAC permissions required for the cross-tenant migration are Storage Account Contributor (on the Storage Account) and Storage Blob Data Owner (on the blob container inside the Storage Account).
 
 :::image type="content" source="media/azure-cross-tenant-blob-migration/azure-resource-relationship-sml.png" alt-text="Screenshot of a diagram showing the source and target tenants, each with a Storage Mover resource, an endpoint with a system-assigned identity, and a storage account. The source project owns the job definition and job run, and blobs are copied from source to target." lightbox="media/azure-cross-tenant-blob-migration/azure-resource-relationship-lrg.png":::
 
@@ -78,6 +78,8 @@ Each Storage Mover resource has a guided **Get started** experience under **Plan
 
 - In the source tenant (**To another tenant**): **Prerequisite** > **Source** > **RBAC** > **Project** > **Migration job**.
 - In the target tenant (**From another tenant**): **Prerequisite** > **Target** > **RBAC** > **Migration job**.
+
+:::image type="content" source="media/azure-cross-tenant-blob-migration/source-get-started.png" alt-text="Screenshot of the Get started tab in the source Storage Mover with Azure to Azure, Azure Blob container, and To another tenant selected, and the Prerequisite card displayed." lightbox="media/azure-cross-tenant-blob-migration/source-get-started.png":::
 
 You can also create endpoints and assign access outside of the **Get started** flow. See [Create source and target endpoints without the Get started flow](#create-source-and-target-endpoints-without-the-get-started-flow) and [Assign access to an endpoint](#assign-access-to-an-endpoint) later in this article.
 
@@ -119,7 +121,7 @@ In the source tenant, perform steps S1 through S8.
 
 Sign in to the source tenant and select the subscription for the source Storage Mover resource. Register `Microsoft.StorageMover` in that subscription. Add `--use-device-code` to `az login` if your environment requires device-code sign-in.
 
-Azure CLI command
+**Azure CLI command**
 
 ```azurecli
 az cloud set --name "AzureCloud"
@@ -141,7 +143,7 @@ az provider register --namespace Microsoft.StorageMover `
 
 If the resource group for the source Storage Mover doesn't exist, create it. The resource group's metadata location doesn't determine the Storage Mover resource's region.
 
-Azure CLI command
+**Azure CLI command**
 
 ```azurecli
 az group create --name "<source-mover-resource-group>" `
@@ -174,7 +176,7 @@ az group create --name "contoso-migration-rg" `
 
 Create the source Storage Mover in the region you selected for both Storage Mover resources.
 
-Azure CLI command
+**Azure CLI command**
 
 ```azurecli
 az rest --method PUT `
@@ -241,7 +243,7 @@ az rest --method PUT `
 
 Create a source endpoint under the source Storage Mover resource. Set `storageAccountResourceId` to the source storage account, and `blobContainerName` to the existing source blob container. Set `endpointKind` to `Source` and `enableCrossTenantTransfer` to `true`. In `allowedStorageAccounts`, specify the full resource ID of the target storage account.
 
-Azure CLI command
+**Azure CLI command**
 
 ```azurecli
 az rest --method PUT `
@@ -307,7 +309,7 @@ az rest --method PUT `
 
 ### [Azure portal](#tab/portal)
 
-1. On the **Get started** tab, select **RBAC**, and then select **Assign access**.
+1. In the same **Get started** flow, select **RBAC**, and then select **Assign access**.
 1. Storage Mover assigns roles to the source endpoint's managed identity: **Storage Account Contributor** on the source storage account, and **Storage Blob Data Owner** on the source blob container.
 1. Confirm that each role shows **Successfully assigned**, and then select **Done**. If an assignment fails, ensure your account can create role assignments (see [Prerequisites](#prerequisites)), and then retry or follow the steps in [Assign access to an endpoint](#assign-access-to-an-endpoint).
 
@@ -315,48 +317,32 @@ az rest --method PUT `
 
 ### [Azure CLI](#tab/CLI)
 
-Assign *Storage Account Contributor* and *Storage Blob Data Owner* RBAC roles to the source endpoint's system-assigned managed identity, scoped to the source storage account. Retrieve the identity's principal ID to perform this action.
+Assign the *Storage Account Contributor* RBAC role to the source endpoint's system-assigned managed identity, scoped to the source storage account, and the *Storage Blob Data Owner* RBAC role scoped to the source blob container inside the source storage account. Retrieve the identity's principal ID to perform this action. Use the returned principal ID value for `source-endpoint-principal-id` in both commands. If no principal ID is returned, wait for the endpoint provisioning to complete and repeat the `GET` request. Don't proceed with an empty principal ID.
 
 > [!IMPORTANT]
-> In this cross-tenant workflow, each endpoint identity needs both RBAC roles on its own storage account.
+> In this cross-tenant workflow, each endpoint identity needs both RBAC roles: *Storage Account Contributor* on its storage account and *Storage Blob Data Owner* on its blob container.
 
-Azure CLI command
+**Azure CLI command**
 
 ```azurecli
-az rest --method GET `
+$sourcePrincipalId = az rest --method GET `
   --url "https://<source-management-host>/subscriptions/<source-mover-subscription-id>/resourceGroups/<source-mover-resource-group>/providers/Microsoft.StorageMover/storageMovers/<source-mover-name>/endpoints/<source-endpoint-name>?api-version=2026-05-01" `
   --resource "https://management.azure.com/" `
   --subscription "<source-mover-subscription-id>" `
   --query identity.principalId --output tsv
-```
 
-**Example command**
-
-```azurecli
-az rest --method GET `
-  --url "https://eastus2.management.azure.com/subscriptions/11112222-bbbb-3333-cccc-4444dddd5555/resourceGroups/contoso-migration-rg/providers/Microsoft.StorageMover/storageMovers/contoso-mover/endpoints/contoso-source-endpoint?api-version=2026-05-01" `
-  --resource "https://management.azure.com/" `
-  --subscription "11112222-bbbb-3333-cccc-4444dddd5555" `
-  --query identity.principalId --output tsv
-```
-
-Use the returned principal ID value for `source-endpoint-principal-id` in both commands. If no principal ID is returned, wait for the endpoint provisioning to complete and repeat the `GET` request. Don't proceed with an empty principal ID.
-
-Azure CLI command
-
-```azurecli
 az role assignment create `
-  --assignee-object-id "<source-endpoint-principal-id>" `
+  --assignee-object-id $sourcePrincipalId `
   --assignee-principal-type ServicePrincipal `
   --role "Storage Account Contributor" `
   --scope "/subscriptions/<source-storage-subscription-id>/resourceGroups/<source-storage-resource-group>/providers/Microsoft.Storage/storageAccounts/<source-storage-account-name>" `
   --subscription "<source-storage-subscription-id>" --output json
 
 az role assignment create `
-  --assignee-object-id "<source-endpoint-principal-id>" `
+  --assignee-object-id $sourcePrincipalId `
   --assignee-principal-type ServicePrincipal `
   --role "Storage Blob Data Owner" `
-  --scope "/subscriptions/<source-storage-subscription-id>/resourceGroups/<source-storage-resource-group>/providers/Microsoft.Storage/storageAccounts/<source-storage-account-name>" `
+  --scope "/subscriptions/<source-storage-subscription-id>/resourceGroups/<source-storage-resource-group>/providers/Microsoft.Storage/storageAccounts/<source-storage-account-name>/blobServices/default/containers/<source-container-name>" `
   --subscription "<source-storage-subscription-id>" --output json
 ```
 
@@ -380,7 +366,7 @@ az role assignment create `
   --assignee-object-id $sourcePrincipalId `
   --assignee-principal-type ServicePrincipal `
   --role "Storage Blob Data Owner" `
-  --scope "/subscriptions/11112222-bbbb-3333-cccc-4444dddd5555/resourceGroups/contoso-storage-rg/providers/Microsoft.Storage/storageAccounts/contososource001" `
+  --scope "/subscriptions/11112222-bbbb-3333-cccc-4444dddd5555/resourceGroups/contoso-storage-rg/providers/Microsoft.Storage/storageAccounts/contososource001/blobServices/default/containers/contoso-source" `
   --subscription "11112222-bbbb-3333-cccc-4444dddd5555" --output json
 ```
 
@@ -392,33 +378,15 @@ A *migration project* organizes migrations into manageable units. A *job definit
 
 ### [Azure portal](#tab/portal)
 
-1. Open the source Storage Mover resource, and go to **Projects** > **Get started**. If needed, select the same options as in step [S3](#s3-create-the-source-endpoint). The **Source** step shows as completed.
-1. Select **Project**, and then select **Create project**. To use an existing project, select **Select existing project** instead.
-1. Enter a **Project name**. You can't change the project name later. Optionally, enter a **Project description**, and then select **Create**.
+Select **Project** in the **Get Started flow** to open the **Create a project** pane. Enter a **Project name**. You can't change the project name later. Optionally, enter a **Project description**, and then select **Create**.
 
-    :::image type="content" source="media/azure-cross-tenant-blob-migration/project-create.png" alt-text="Screenshot of the Project step in the Get started flow of the source Storage Mover, with the Create project pane open." lightbox="media/azure-cross-tenant-blob-migration/project-create.png":::
+:::image type="content" source="media/azure-cross-tenant-blob-migration/project-create.png" alt-text="Screenshot of the Project step in the Get started flow of the source Storage Mover, with the Create project pane open." lightbox="media/azure-cross-tenant-blob-migration/project-create.png":::
 
 ### [Azure CLI](#tab/CLI)
 
-If you start a new CLI session, or if you used the same session for the target tenant steps, sign in to the source tenant again and select the source Storage Mover subscription.
+Create a migration project in the source Storage Mover resource using the following command.
 
-Azure CLI command
-
-```azurecli
-az login --tenant "<source-tenant-id>" --output none
-az account set --subscription "<source-mover-subscription-id>"
-```
-
-**Example command**
-
-```azurecli
-az login --tenant "00001111-aaaa-2222-bbbb-3333cccc4444" --output none
-az account set --subscription "11112222-bbbb-3333-cccc-4444dddd5555"
-```
-
-Create the project in the source Storage Mover resource.
-
-Azure CLI command
+**Azure CLI command**
 
 ```azurecli
 az rest --method PUT `
@@ -482,7 +450,7 @@ az rest --method PUT `
 
     :::image type="content" source="media/azure-cross-tenant-blob-migration/job-basics-tab.png" alt-text="Screenshot of the Basics tab of the migration job, showing the source endpoint, the target tenant ID, and the target endpoint ID." lightbox="media/azure-cross-tenant-blob-migration/job-basics-tab.png":::
 
-1. On the **Schedule** tab, select the **Migration frequency**: **No schedule** to start the migration manually, **One-time schedule**, or **Recurring schedule**. Select **Next**.
+1. On the **Schedule** tab, select the **Migration frequency**: **No schedule**, **One-time schedule**, or **Recurring schedule** (you need to start the migration manually for the first time regardless of the schedule). Select **Next**.
 
     :::image type="content" source="media/azure-cross-tenant-blob-migration/job-schedule-tab.png" alt-text="Screenshot of the Schedule tab of the migration job, with options for no schedule, a one-time schedule, or a recurring schedule." lightbox="media/azure-cross-tenant-blob-migration/job-schedule-tab.png":::
 
@@ -497,6 +465,22 @@ az rest --method PUT `
 
 ### [Azure CLI](#tab/CLI)
 
+If you start a new CLI session, or if you used the same session for the target tenant steps, sign in to the source tenant again and select the source Storage Mover subscription.
+
+**Azure CLI command**
+
+```azurecli
+az login --tenant "<source-tenant-id>" --output none
+az account set --subscription "<source-mover-subscription-id>"
+```
+
+**Example command**
+
+```azurecli
+az login --tenant "00001111-aaaa-2222-bbbb-3333cccc4444" --output none
+az account set --subscription "11112222-bbbb-3333-cccc-4444dddd5555"
+```
+
 Create the job definition in the source project. The example uses *Additive* mode and the root of each container.
 
 The following properties define the migration:
@@ -509,7 +493,7 @@ The following properties define the migration:
 - `crossTenantEndpointTenantId`: The target tenant's Entra tenant ID.
 - `crossTenantEndpointResourceId`: The full resource ID of the target Storage Mover endpoint. Use the endpoint ID, not the target storage account ID. Its endpoint name must match `targetName`.
 
-Azure CLI command
+**Azure CLI command**
 
 ```azurecli
 az rest --method PUT `
@@ -579,8 +563,8 @@ az rest --method PUT `
 
     :::image type="content" source="media/azure-cross-tenant-blob-migration/job-properties.png" alt-text="Screenshot of the migration job Properties tab, showing source and target details before the job is started." lightbox="media/azure-cross-tenant-blob-migration/job-properties.png":::
 
-1. Select **Start job**. In the **Start job** pane, Storage Mover checks and assigns the roles for the source endpoint.
-1. Because the target resources are in a different tenant, their RBAC permissions can't be verified from the source tenant. Storage Mover verifies target access when the job starts. If any required permission is missing, the job stops before any data is moved.
+1. Select **Start job**. In the **Start job** pane, Storage Mover checks and assigns the RBAC permissions for the source endpoint.
+1. Because the target resources are in a different tenant, their RBAC permissions for the target resources can't be verified from the source tenant. Storage Mover verifies target access when the job starts. If any required permission is missing, the job stops before any data is moved.
 1. Select **Start**.
 
     :::image type="content" source="media/azure-cross-tenant-blob-migration/start-job-pane.png" alt-text="Screenshot of the Start job pane for a cross-tenant job, showing the source endpoint role checks and a note that target permissions are verified when the job starts." lightbox="media/azure-cross-tenant-blob-migration/start-job-pane.png":::
@@ -589,7 +573,7 @@ az rest --method PUT `
 
 Confirm that the endpoint identities have the required permissions and that the job definition is ready. If you start the job in a new CLI session, sign in to the source tenant and select the source Storage Mover subscription again.
 
-Azure CLI command
+**Azure CLI command**
 
 ```azurecli
 az login --tenant "<source-tenant-id>" --output none
@@ -605,7 +589,7 @@ az account set --subscription "11112222-bbbb-3333-cccc-4444dddd5555"
 
 Read the job definition before submitting a job run. Verify its endpoint bindings, copy mode, and subpaths. If it has a `latestJobRunResourceId`, inspect that run as described in step [S8](#s8-monitor-migration-progress). Don't submit a new run while a previous run is active.
 
-Azure CLI command
+**Azure CLI command**
 
 ```azurecli
 az rest --method GET `
@@ -625,7 +609,7 @@ az rest --method GET `
 
 Start the job by calling the `startJob` action.
 
-Azure CLI command
+**Azure CLI command**
 
 ```azurecli
 az rest --method POST `
@@ -653,15 +637,24 @@ The response includes `jobRunResourceId`, the resource ID of the job run. Retain
 
 In the source Storage Mover, go to **Projects**, select the project, and then select the job. The job status is shown at the top of the job page. Select the **Run history** tab to see each run and its status, and select a run for details such as the number of processed and failed items.
 
+:::image type="content" source="media/azure-cross-tenant-blob-migration/job-monitoring.png" alt-text="Screenshot of the Monitoring tab for a successful migration job, showing processed files and folders, data volume, and migration progress." lightbox="media/azure-cross-tenant-blob-migration/job-monitoring.png":::
+
 ### [Azure CLI](#tab/CLI)
 
 Monitor the migration job run from the source tenant. Replace `job-run-resource-id` with the complete `jobRunResourceId` returned by the `startJob` operation, beginning with `/subscriptions/`. Don't add a second slash between the management host and this resource ID.
 
-Azure CLI command
+If you don't have the run ID, list the job's runs:
+
+**Azure CLI command**
 
 ```azurecli
+$jobRunResourceId = az rest --method GET `
+  --url "https://<source-management-host>/subscriptions/<source-mover-subscription-id>/resourceGroups/<source-mover-resource-group>/providers/Microsoft.StorageMover/storageMovers/<source-mover-name>/projects/<project-name>/jobDefinitions/<job-definition-name>/jobRuns?api-version=2026-05-01" `
+  --resource "https://management.azure.com/" `
+  --subscription "<source-mover-subscription-id>" --output json
+
 az rest --method GET `
-  --url "https://<source-management-host><job-run-resource-id>?api-version=2026-05-01" `
+  --url "https://<source-management-host>${jobRunResourceId}?api-version=2026-05-01" `
   --resource "https://management.azure.com/" `
   --subscription "<source-mover-subscription-id>" --output json
 ```
@@ -683,28 +676,6 @@ az rest --method GET `
 
 Inspect `properties.status` and any error information in the response. Repeat the `GET` request as needed. `Succeeded`, `Failed`, and `Canceled` are terminal statuses; an in-progress status isn't evidence of completed migration. A successful job run should still be followed by data validation.
 
-If you don't have the run ID, list the job's runs:
-
-Azure CLI command
-
-```azurecli
-az rest --method GET `
-  --url "https://<source-management-host>/subscriptions/<source-mover-subscription-id>/resourceGroups/<source-mover-resource-group>/providers/Microsoft.StorageMover/storageMovers/<source-mover-name>/projects/<project-name>/jobDefinitions/<job-definition-name>/jobRuns?api-version=2026-05-01" `
-  --resource "https://management.azure.com/" `
-  --subscription "<source-mover-subscription-id>" --output json
-```
-
-**Example command**
-
-```azurecli
-az rest --method GET `
-  --url "https://eastus2.management.azure.com/subscriptions/11112222-bbbb-3333-cccc-4444dddd5555/resourceGroups/contoso-migration-rg/providers/Microsoft.StorageMover/storageMovers/contoso-mover/projects/contoso-to-fabrikam/jobDefinitions/blob-transfer/jobRuns?api-version=2026-05-01" `
-  --resource "https://management.azure.com/" `
-  --subscription "11112222-bbbb-3333-cccc-4444dddd5555" --output json
-```
-
-Use the returned run resource ID for the preceding `GET` request. If the list response includes a `nextLink` value, retrieve that URL by using `az rest --method GET` with the same token audience and source subscription to inspect the remaining results. Don't infer that no run exists from only the first page of a paginated response.
-
 ---
 
 When you configure logging, copy logs and job run logs help you investigate migration errors and the results for individual blobs. For logging configuration, see [How to enable Azure Storage Mover copy and job logs](log-monitoring.md).
@@ -724,7 +695,7 @@ Perform steps T1 through T4 in the target tenant.
 
 Sign in to the target tenant, select the subscription for the target Storage Mover, and register `Microsoft.StorageMover`. If a different operator manages this tenant, that operator runs steps [T1](#t1-prepare-the-target-tenant) through [T4](#t4-assign-rbac-roles-to-the-target-endpoint).
 
-Azure CLI command
+**Azure CLI command**
 
 ```azurecli
 az login --tenant "<target-tenant-id>" --output none
@@ -744,7 +715,7 @@ az provider register --namespace Microsoft.StorageMover `
 
 If the target Storage Mover resource group doesn't exist, create it:
 
-Azure CLI command
+**Azure CLI command**
 
 ```azurecli
 az group create --name "<target-mover-resource-group>" `
@@ -775,7 +746,7 @@ az group create --name "fabrikam-migration-rg" `
 
 Create a Storage Mover resource in the target tenant. Use the same `mover-region` value as the source Storage Mover.
 
-Azure CLI command
+**Azure CLI command**
 
 ```azurecli
 az rest --method PUT `
@@ -845,7 +816,7 @@ az rest --method PUT `
 
 Create the target endpoint under the target Storage Mover resource. Set `storageAccountResourceId` to the target account, `blobContainerName` to the existing target container, and `endpointKind` to `Target`. Enable cross-tenant transfer and add the source storage account resource ID to `allowedStorageAccounts`.
 
-Azure CLI command
+**Azure CLI command**
 
 ```azurecli
 az rest --method PUT `
@@ -920,9 +891,9 @@ az rest --method PUT `
 
 ### [Azure CLI](#tab/CLI)
 
-Retrieve the principal ID of the target endpoint's system-assigned managed identity and assign both RBAC roles scoped to the target storage account, as you did for the source endpoint.
+Retrieve the principal ID of the target endpoint's system-assigned managed identity. Assign both RBAC roles, as you did for the source endpoint. Use the returned value for `target-endpoint-principal-id`. Assign *Storage Account Contributor* at the target storage account scope and *Storage Blob Data Owner* at the target blob container scope.
 
-Azure CLI command
+**Azure CLI command**
 
 ```azurecli
 az rest --method GET `
@@ -930,23 +901,7 @@ az rest --method GET `
   --resource "https://management.azure.com/" `
   --subscription "<target-mover-subscription-id>" `
   --query identity.principalId --output tsv
-```
 
-**Example command**
-
-```azurecli
-az rest --method GET `
-  --url "https://eastus2.management.azure.com/subscriptions/66aa66aa-bb77-cc88-dd99-00ee00ee00ee/resourceGroups/fabrikam-migration-rg/providers/Microsoft.StorageMover/storageMovers/fabrikam-mover/endpoints/fabrikam-target-endpoint?api-version=2026-05-01" `
-  --resource "https://management.azure.com/" `
-  --subscription "66aa66aa-bb77-cc88-dd99-00ee00ee00ee" `
-  --query identity.principalId --output tsv
-```
-
-Use the returned value for `target-endpoint-principal-id`. Assign both roles at the target storage account scope:
-
-Azure CLI command
-
-```azurecli
 az role assignment create `
   --assignee-object-id "<target-endpoint-principal-id>" `
   --assignee-principal-type ServicePrincipal `
@@ -958,7 +913,7 @@ az role assignment create `
   --assignee-object-id "<target-endpoint-principal-id>" `
   --assignee-principal-type ServicePrincipal `
   --role "Storage Blob Data Owner" `
-  --scope "/subscriptions/<target-storage-subscription-id>/resourceGroups/<target-storage-resource-group>/providers/Microsoft.Storage/storageAccounts/<target-storage-account-name>" `
+  --scope "/subscriptions/<target-storage-subscription-id>/resourceGroups/<target-storage-resource-group>/providers/Microsoft.Storage/storageAccounts/<target-storage-account-name>/blobServices/default/containers/<target-container-name>" `
   --subscription "<target-storage-subscription-id>" --output json
 ```
 
@@ -982,7 +937,7 @@ az role assignment create `
   --assignee-object-id $targetPrincipalId `
   --assignee-principal-type ServicePrincipal `
   --role "Storage Blob Data Owner" `
-  --scope "/subscriptions/66aa66aa-bb77-cc88-dd99-00ee00ee00ee/resourceGroups/fabrikam-storage-rg/providers/Microsoft.Storage/storageAccounts/fabrikamtarget001" `
+  --scope "/subscriptions/66aa66aa-bb77-cc88-dd99-00ee00ee00ee/resourceGroups/fabrikam-storage-rg/providers/Microsoft.Storage/storageAccounts/fabrikamtarget001/blobServices/default/containers/fabrikam-target" `
   --subscription "66aa66aa-bb77-cc88-dd99-00ee00ee00ee" --output json
 ```
 
@@ -1024,7 +979,7 @@ A storage account resource ID uses the following format: `/subscriptions/<subscr
 
 ### [Azure CLI](#tab/CLI)
 
-Azure CLI command
+**Azure CLI command**
 
 ```azurecli
 az storage account show --name "<storage-account-name>" `
@@ -1049,14 +1004,15 @@ The target endpoint resource ID has the format `/subscriptions/<target-mover-sub
 ### [Azure portal](#tab/portal)
 
 1. In the target tenant, open the target Storage Mover and go to **Projects** > **Get started**, with **From another tenant** selected.
-1. Select **Migration job**. Under **Your IDs to share**, copy the **Target tenant ID** and the **Target endpoint Resource ID**. For an example, see the screenshot in step [T4](#t4-assign-rbac-roles-to-the-target-endpoint).
-1. Alternatively, find the tenant ID on the **Overview** page of **Microsoft Entra ID**. Build the endpoint resource ID from the subscription ID and resource group on the Storage Mover **Overview** page and the endpoint name under **Storage endpoints** > **Target endpoints**.
+1. Select **Migration job**. Under **Your IDs to share**, copy the **Target tenant ID** and the **Target endpoint Resource ID**.
+
+    :::image type="content" source="media/azure-cross-tenant-blob-migration/target-ids-to-share.png" alt-text="Screenshot of the Migration job step in the target tenant, showing the target tenant ID and target endpoint resource ID under Your IDs to share." lightbox="media/azure-cross-tenant-blob-migration/target-ids-to-share.png":::
 
 ### [Azure CLI](#tab/CLI)
 
 Run these commands while signed in to the target tenant.
 
-Azure CLI command
+**Azure CLI command**
 
 ```azurecli
 az account show --query tenantId --output tsv
@@ -1126,13 +1082,6 @@ Use the `az rest --method PUT` request and the `target-endpoint.json` payload in
 
 Each endpoint has a system-assigned managed identity. Before a job can run, that identity needs RBAC roles on the storage account and container that the endpoint points to. Assign access in the tenant that owns the endpoint: the source tenant operator can't assign roles for the target endpoint, and the target tenant operator can't assign roles for the source endpoint.
 
-Both the source endpoint and the target endpoint need the same roles:
-
-| Method | Roles assigned to the endpoint's managed identity |
-| --- | --- |
-| Azure portal (**Assign access**) | Storage Account Contributor on the storage account; Storage Blob Data Owner on the blob container |
-| Azure CLI examples in this article | Storage Account Contributor and Storage Blob Data Owner on the storage account |
-
 ### [Azure portal](#tab/portal)
 
 1. Open the Storage Mover resource in the tenant that owns the endpoint. Under **Resource management**, select **Storage endpoints**, and then select the **Source endpoints** or **Target endpoints** tab.
@@ -1140,13 +1089,13 @@ Both the source endpoint and the target endpoint need the same roles:
 
     :::image type="content" source="media/azure-cross-tenant-blob-migration/storage-endpoints-assign-access.png" alt-text="Screenshot of the Target endpoints tab of the Storage endpoints page, with an endpoint selected and the Assign access button highlighted." lightbox="media/azure-cross-tenant-blob-migration/storage-endpoints-assign-access.png":::
 
-1. In the **Check and assign access** pane, Storage Mover checks the existing roles of the endpoint's managed identity and assigns any missing roles. Confirm that each role shows **Successfully assigned**, and then select **Done**.
+1. In the **Check and assign access** pane, Storage Mover checks the existing RBAC permissions of the endpoint's managed identity and assigns any missing RBAC permissions. Confirm that each role shows **Successfully assigned**, and then select **Done**.
 
-The **RBAC** step of the **Get started** flow (steps [S4](#s4-assign-rbac-roles-to-the-source-endpoint) and [T4](#t4-assign-rbac-roles-to-the-target-endpoint)) performs the same assignment. For the source endpoint, the **Start job** pane also checks and assigns the source roles before the job starts.
+The **RBAC** step of the **Get started** flow (steps [S4](#s4-assign-rbac-roles-to-the-source-endpoint) and [T4](#t4-assign-rbac-roles-to-the-target-endpoint)) performs the same assignment. For the source endpoint, the **Start job** pane also checks and assigns the source RBAC permissions before the job starts.
 
 ### [Azure CLI](#tab/CLI)
 
-Get the principal ID of the endpoint's managed identity and create the role assignments at the storage account scope, as shown in step [S4](#s4-assign-rbac-roles-to-the-source-endpoint) (source endpoint) and step [T4](#t4-assign-rbac-roles-to-the-target-endpoint) (target endpoint). Allow time for role assignments to propagate before starting the job.
+Get the principal ID of the endpoint's managed identity and create the role assignments: *Storage Account Contributor* at the storage account scope and *Storage Blob Data Owner* at the blob container scope, as shown in step [S4](#s4-assign-rbac-roles-to-the-source-endpoint) (source endpoint) and step [T4](#t4-assign-rbac-roles-to-the-target-endpoint) (target endpoint). Allow time for role assignments to propagate before starting the job.
 
 ---
 
@@ -1160,7 +1109,7 @@ Yes. An endpoint with cross-tenant transfer enabled and an allow list can also b
 
 No. **Allow cross-tenant replication** is a storage account setting for object replication. Storage Mover doesn't use it, so the setting can remain **Disabled** on both the source and target storage accounts (`allowCrossTenantReplication: false`).
 
-### Do I need an account in both tenants?
+### Do I need a user account in both tenants?
 
 No. Each tenant operator configures their own side: the source tenant operator performs steps [S1](#s1-prepare-the-source-tenant)–[S8](#s8-monitor-migration-progress), and the target tenant operator performs steps [T1](#t1-prepare-the-target-tenant)–[T4](#t4-assign-rbac-roles-to-the-target-endpoint). The operators only need to exchange the storage account resource IDs, the target tenant ID, and the target endpoint resource ID. You can also use one account that has access to both tenants, for example through a guest account.
 
