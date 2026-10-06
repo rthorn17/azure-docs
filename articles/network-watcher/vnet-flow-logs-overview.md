@@ -286,7 +286,7 @@ The following table outlines the support scope of flow logs.
 | VPN gateway | Not supported | Supported |
 
 > [!NOTE]
-> Azure API Management supports both VNet Injection and VNet Integration deployment models. Traffic Analytics currently supports only Azure API Management instances deployed using VNet Injection. VNet Integration deployments are not supported.
+> Azure API Management supports both VNet Injection and VNet Integration deployment models. Traffic Analytics currently supports only Azure API Management instances deployed using VNet Injection. VNet Integration deployments aren't supported.
 
 ## Availability
 
